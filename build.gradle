@@ -1,0 +1,231 @@
+buildscript {
+    project.ext {
+        serenity_version = '3.2.0'
+    }
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath("net.serenity-bdd:serenity-gradle-plugin:$serenity_version")
+        classpath "io.qameta.allure:allure-gradle:${allureGradleVersion}"
+    }
+}
+
+plugins {
+    id 'com.github.ben-manes.versions' version '0.20.0' // provides tasks for discovering dependency updates
+    id 'net.researchgate.release' version '3.0.0'  // release your source code
+}
+
+
+
+group 'com.pratilipi.core.utaf.automation'
+
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: "io.qameta.allure"
+apply plugin: 'maven-publish'
+
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//
+//            artifact sourceJar
+//            artifact packageJavadoc
+//        }
+//    }
+//}
+
+javadoc {
+    source = sourceSets.main.allJava
+    classpath = configurations.compileClasspath
+
+    options
+            {
+                setMemberLevel JavadocMemberLevel.PUBLIC
+                setAuthor true
+
+                links "https://docs.oracle.com/javase/8/docs/api/"
+            }
+}
+
+task sourceJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task packageJavadoc(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+configurations {
+    testCompile
+}
+
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+//    maven { url "http://jfrog.high-mobility.com/artifactory/gradle-release-local/" }
+}
+
+configurations.all {
+    resolutionStrategy {
+        cacheDynamicVersionsFor 0, 'seconds'
+        cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
+
+//afterReleaseBuild.dependsOn uploadArchives
+
+dependencies {
+    implementation "io.github.bonigarcia:webdrivermanager:${webdriverManagerVersion}"
+    implementation "org.seleniumhq.selenium:selenium-java:${seleniumJavaVersion}"
+    implementation "org.testng:testng:${testngVersion}"
+    implementation "com.aventstack:extentreports:${extentReportsVersion}"
+
+    //implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
+    implementation "com.google.guava:guava:${guavaVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+
+    implementation "org.apache.poi:poi:${poiVersion}"
+    implementation "org.apache.poi:poi-ooxml:${poiOoxmlVersion}"
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.18.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
+
+    implementation "org.apache.httpcomponents:httpclient:${httpclientVersion}"
+
+    implementation "com.google.inject:guice:${guiceVersion}"
+    implementation "javax.xml:jaxb-api:${jaxbApiVersion}"
+
+    implementation "net.sourceforge.htmlunit:htmlunit:${htmlunitVersion}"
+
+    //Alluri Report Dependencies
+   // implementation "ru.yandex.qatools.allure:allure-report-data:${allureReportVersion}"
+    implementation "com.jayway.jsonpath:json-path:${jsonPathVersion}"
+    implementation "javax.persistence:javax.persistence-api:${persistenceApiVersion}"
+    implementation "javax.xml.bind:jaxb-api:${jaxbVersion}"
+    implementation "commons-configuration:commons-configuration:${commonConfigVersion}"
+    implementation "commons-io:commons-io:${commonioVersion}"
+    implementation "org.rauschig:jarchivelib:${rauschigVersion}"
+    implementation "com.jcraft:jsch:${jcraftVersion}"
+    implementation "com.opencsv:opencsv:${opencsvVersion}"
+    implementation "javax.mail:mail:${javaMailVersion}"
+    implementation "javax.activation:activation:${javaActivationVersion}"
+    implementation "com.github.fge:json-schema-validator:${jsonSchemaValidatorVersion}"
+    implementation "org.jsoup:jsoup:${jsoupVersion}"
+    implementation "us.codecraft:xsoup:${xsoupVersion}"
+    implementation "org.json:json:${jsonVersion}"
+    implementation "net.javacrumbs.json-unit:json-unit:${jsonUnitVersion}"
+    //implementation "io.qameta.allure:allure-testng:${allure_java_version}"
+    implementation "com.jcraft:jsch:${jcraftVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    implementation "javax.validation:validation-api:${javaValidationVersion}"
+
+    implementation "xml-apis:xml-apis:${xmlApiVersion}"
+    implementation "com.paulhammant:ngwebdriver:${ngwebdriverVersion}"
+
+    implementation "com.github.stephenc.monte:monte-screen-recorder:${montescreenrecorderversion}"
+
+
+
+}
+
+
+
+/*test.doFirst {
+    jvmArgs "-javaagent:${configurations.agent.singleFile}"
+}*/
+
+
+
+/*task openAllureReport(type: Exec) {
+
+    commandLine ".allure/allure-${allure_version}/bin/allure", "open", "${buildDir}/test-results/allure-reports"
+
+    doFirst {
+        downloadAllure.execute()
+        if(file('.allure').exists()) {
+            exec {
+                commandLine "chmod", "755", ".allure/allure-${allure_version}/bin/allure"
+            }
+        } else {
+            throw new RuntimeException('downloadAllure task did not execute successfully');
+        }
+    }
+}*/
+
+/*allure {
+    version = "${allure_version}"
+    autoconfigure = true
+    aspectjweaver = true
+    clean = true
+    resultsDir = file("${buildDir}/test-results/allure-results")
+    reportDir = file("${buildDir}/test-results/allure-reports")
+
+    useTestNG {
+        version = "${allure_java_version}"
+    }
+
+    downloadLink = "https://dl.bintray.com/qameta/generic/io/qameta/allure/allure/${allure_version}/allure-${allure_version}.zip"
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+}*/
+
+gradle.startParameter.continueOnFailure = true
+
+def smoke = project.hasProperty("smoke")
+
+test {
+
+    afterTest { desc, result ->
+        println "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+    }
+
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+
+    // show standard out and standard error of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+
+    //add system property here
+    systemProperties System.properties
+   // finalizedBy 'allureReport'
+    systemProperties = System.getProperties() as Map<String, ?>
+    systemProperty "logback.configurationFile", "logback.xml"
+    minHeapSize = "512m"
+    maxHeapSize = "2048m"
+    testLogging.showStandardStreams = true
+
+    useTestNG() {
+
+        dependsOn cleanTest
+        useDefaultListeners = true
+
+
+        //It reads env variable and set , if it is null, defauls env as DCI will be enabled
+        systemProperty "env", System.getProperty("env","qa")
+
+        //Grid configurations
+        systemProperty "remoteDriver", "true"
+        systemProperty "gridURL", "localhost:4444/wd/hub"
+
+        if(smoke)
+            suites "src/test/resources/TestSuites/SmokeTestsuite.xml"
+        else
+            suites "/sampleTesNg.xml"
+    }
+}

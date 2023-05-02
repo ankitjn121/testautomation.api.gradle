@@ -6,10 +6,18 @@ pipeline {
     }
 
     stages {
-
+        stage("Clone Git Repository") {
+            steps {
+                git(
+                    url: "https://github.com/ankitjn121/testautomation.api.gradle",
+                    branch: "master",
+                    changelog: true,
+                    poll: true
+                )
+            }
         stage('Integration Test') {
             when {
-                branch 'release'
+                branch 'master'
             }
 
             steps {
